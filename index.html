@@ -353,7 +353,7 @@ var dams = new here.xyz.maps.layers.TileLayer({
 //logistics
 var airports = new here.xyz.maps.layers.TileLayer({
 	name: 'Global Airports',
-    min: 4,
+    min: 6,
     max: 20,
     provider: new here.xyz.maps.providers.SpaceProvider ({
     	// Name of the provider
@@ -373,7 +373,7 @@ var airports = new here.xyz.maps.layers.TileLayer({
         linkStyle: [{
           type: "Image",
           zIndex: 0,
-		  width: 20,
+		  width: 10,
 		  fill: "#fffff",
           src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAABmJLR0QA/wD/AP+gvaeTAAABqUlEQVRIie2UvStGYRjGr+d9X19ZMKFkMJmEUEwGH2UxS8rsH5AS/4EyKpMwkYGUsimLFDEYDEoJYSBfb/wsJx6P8/G+x3lNrjrD89z3uX73fXfuI/0rpoAiYBw4ADYKDasBdvnSSSFhjcAZ3zVVKFgXcOPAjoCyQsAGgUcHdgU02HkZ56UmSfOSaiVVSLIre5b0ZJ0fJGWtc72ktBMfMMacBlU4ADyQjF6Bfj9O2oMZSW2SkFQtqTxgcrkISaPGmFW/oPHpNCWpWVKPpF5JXZKK8wCeG2PqYhT6WUAGaAWmgT3gLWKcF7FhAQV0AM8hwOskYZXAcUSHd0nBMsCmz9fo6j4JmAGWHeN9oBl4d+6foh2jgROO6Q5Q5cXcEWej/GzjUmAWWADGgBZgxOliFevfCMz4jPXHuoVBizxTP027ZkDfr4CeSQmw4ZhMBuSW83NNUnkBrU5XLJPukNytXIGBAWNMVtKQpHXvqj2kvm2b7z3xBKSBJWAtJKfJ6u42NswyLAbmQuIp4NIDHv4aaEHTIfFF4AXoTASYQ0EjwPCfwDxgfrv3V/oA2G3jN0eGPewAAAAASUVORK5CYII="}]
 	  },
@@ -383,7 +383,7 @@ var airports = new here.xyz.maps.layers.TileLayer({
 
 var hospitals = new here.xyz.maps.layers.TileLayer({
 	name: 'Global Medical Support',
-    min: 4,
+    min: 6,
     max: 20,
     provider: new here.xyz.maps.providers.SpaceProvider ({
 		name:  'SpaceProvider',
@@ -402,7 +402,7 @@ var hospitals = new here.xyz.maps.layers.TileLayer({
     		linkStyle: [
 				{zIndex:1, 
 				type:"Image",
-				width: 20,
+				width: 10,
 				src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAABmJLR0QA/wD/AP+gvaeTAAABFElEQVRIie2VvUrEQBRGzyeClcKCWIm2YmnnQ4jYiwjW2+Q1xM5GWNBKkG1ttNNeLCysLPx5CBH1s3CzjmM27MZJitUDgXw3zD3kTshAwyi/sb0ObAGLCfu/AXfAnqSrftX2puvl2fYKwETPmSV8qyKmgHYonK9ZCLAQChtjssKaY+AxyDvAbJ3CA0mXebC9Noqw8ZH+C5NT9tF0gPOC+m2UM2Amqgk4GVV4Lalb8vyzs3QW12wPnNzf3sO27Y2CeibpJg+2O/w80sQAyoRLvSumFeVVYLmkzzfGfw/HX1jleDq1/Rrk+C+TXDhdYU2ffKRPv2kyJA+h8LBm2TtwBF8j3QdegG1gLrHsHtiVdJG473B8ANWnlE/fR3QJAAAAAElFTkSuQmCC",
 				fill:"#ffffff"
 				},
