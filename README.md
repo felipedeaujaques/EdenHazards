@@ -1,5 +1,5 @@
 # EdenHazards Demo
-working demo: http://felipedeaujaques.github.io/index.html
+working demo: https://felipedeaujaques.github.io/EdenHazards/index.html
 
 used data:
 
