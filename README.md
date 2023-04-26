@@ -3,15 +3,22 @@ working demo: https://felipedeaujaques.github.io/EdenHazards/index.html
 
 used data:
 
-volcanoes: https://www.arcgis.com/home/item.html?id=edccc28b629b4f3c931b241eaef54840
+volcanoes: https://webservices.volcano.si.edu/geoserver/GVP-VOTW/wfs?request=GetCapabilities
 
-airports, ports: https://data.humdata.org/dataset?tags=geojson (more infrastructure data available)
+airports: https://data.opendatasoft.com/explore/dataset/osm-world-airports@babel/export/
 
-earthquakes feed: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
+ports: https://datacatalog.worldbank.org/search/dataset/0038118
 
-dams and reservoirs: http://sedac.ciesin.columbia.edu/data/set/grand-v1-dams-rev01/data-download
+earthquakes (last 30 days, significant): https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson
+
+dams: https://www.globaldamwatch.org/
 
 high risk flood area: https://www.ldeo.columbia.edu/chrr/research/hotspots/coredata.html (much more data for other hazards)
 
-hospitals: https://healthsites.io/map
+medical (hospitals, doctors, pharmacies, etc): https://healthsites.io/map
+
+air quality: https://openaq.org/
+
+wildfires (California only): https://incidents.fire.ca.gov/umbraco/api/IncidentApi/GeoJsonList
+
 

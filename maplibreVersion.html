@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>OpenMapTiles OSM Bright style</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+        .mapboxgl-popup {max-width: fit-content !important; }
+        h1 { font-size: smaller !important; }
+        pre { font-size: smaller !important; }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    <script>
+        var map = new maplibregl.Map({
+            container: 'map',
+            style: {
+  "version": 8,
+  "glyphs": "http://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+	"sources": {
+    "osm": {
+			"type": "raster",
+			"tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+			"tileSize": 256,
+      "attribution": "&copy; OpenStreetMap Contributors",
+      "maxzoom": 19
+    }
+  },
+  "layers": [
+    {
+      "id": "osm",
+      "type": "raster",
+      "source": "osm" // This must match the source key above
+    }
+  ]
+},
+            center: [8.5456, 47.3739],
+            zoom: 0
+        });
+
+    //CALL TO OPENAQ https://api.openaq.org/v2/locations?limit=100&page=1&offset=0&sort=desc&radius=1000&order_by=lastUpdated&dumpRaw=false
+let earthquakeData = null;
+fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson')
+.then(res => res.json())
+.then(out =>
+ earthquakeData = out )
+.catch(err => { throw err });
+
+    map.on('load', function () {
+map.addSource('earthquakes', {
+'type': 'geojson',
+'data': earthquakeData
+});
+map.addLayer({
+'id': 'earthquakes',
+'type': 'circle',
+'source': 'earthquakes',
+'paint': {
+  'circle-radius': 4,
+'circle-color': '#B42222'
+}
+});
+});
+
+map.on('click', 'earthquakes', function (e) {
+new maplibregl.Popup()
+.setLngLat(e.lngLat)
+.setHTML('<h1>Earthquake</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
+.addTo(map);
+});
+
+
+////airports
+
+let airportData = null;
+fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson')
+.then(res => res.json())
+.then(out =>
+airportData = out )
+.catch(err => { throw err });
+
+    map.on('load', function () {
+map.addSource('airports', {
+'type': 'geojson',
+'data': airportData
+});
+map.addLayer({
+'id': 'airports',
+'type': 'symbol',
+'source': 'airports',
+'layout': {
+'text-field':  ['get', 'name'],
+'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+'text-radial-offset': 0.5,
+'text-justify': 'auto',
+'text-font': ['Open Sans Bold'],
+'text-size': 12
+}
+});
+});
+
+map.on('click', 'airports', function (e) {
+new maplibregl.Popup()
+.setLngLat(e.lngLat)
+.setHTML('<h1>Airport</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
+.addTo(map);
+});
+
+
+///dams
+
+let damData = null;
+fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/dams.geojson')
+.then(res => res.json())
+.then(out =>
+damData = out )
+.catch(err => { throw err });
+
+    map.on('load', function () {
+map.addSource('dams', {
+'type': 'geojson',
+'data': damData
+});
+map.addLayer({
+'id': 'dams',
+'type': 'circle',
+'source': 'dams',
+'paint': {
+  'circle-radius': 4,
+'circle-color': '#0000FF'
+}
+});
+});
+
+map.on('click', 'dams', function (e) {
+new maplibregl.Popup()
+.setLngLat(e.lngLat)
+.setHTML('<h1>Dam</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
+.addTo(map);
+});
+
+
+
+
+    </script>
+</body>
+</html>
