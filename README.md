@@ -1,5 +1,5 @@
 # EdenHazards Demo
-working demo: https://felipedeaujaques.github.io/EdenHazards/index.html
+working demo: https://felipedeaujaques.github.io/EdenHazards/maplibreVersion.html
 
 used data:
 
