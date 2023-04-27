@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>OpenMapTiles OSM Bright style</title>
+    <title>Eden Hazards - Open Data Map Viewer with maplibre-gl</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.css" rel="stylesheet" />
@@ -15,35 +15,42 @@
     </style>
 </head>
 <body>
-    <div id='map'></div>
-    <script>
-        var map = new maplibregl.Map({
-            container: 'map',
-            style: {
-  "version": 8,
-  "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-	"sources": {
-    "osm": {
-			"type": "raster",
-			"tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-			"tileSize": 256,
-      "attribution": "&copy; OpenStreetMap Contributors",
-      "maxzoom": 19
-    }
-  },
-  "layers": [
-    {
-      "id": "osm",
-      "type": "raster",
-      "source": "osm" // This must match the source key above
-    }
-  ]
-},
-            center: [8.5456, 47.3739],
-            zoom: 0
-        });
+<div id='map'></div>
+<script>
+let map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      "version": 8,
+      "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+      "sources": {
+        "osm": {
+          "type": "raster",
+          "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          "tileSize": 256,
+          "attribution": "&copy; OpenStreetMap Contributors",
+          "maxzoom": 19
+        }
+      },
+      "layers": [
+        {
+          "id": "osm",
+          "type": "raster",
+          "source": "osm" // This must match the source key above
+        }
+      ]
+    },
+    center: [8.5456, 47.3739],
+    zoom: 0
+});
 
-    //CALL TO OPENAQ https://api.openaq.org/v2/locations?limit=100&page=1&offset=0&sort=desc&radius=1000&order_by=lastUpdated&dumpRaw=false
+function createPopup(name, e) {
+  return new maplibregl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML('<h1>'+name+'</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
+                        .addTo(map);
+}
+
+
 let earthquakeData = null;
 fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson')
 .then(res => res.json())
@@ -51,7 +58,7 @@ fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_mon
  earthquakeData = out )
 .catch(err => { throw err });
 
-    map.on('load', function () {
+map.on('load', function () {
 map.addSource('earthquakes', {
 'type': 'geojson',
 'data': earthquakeData
@@ -67,12 +74,7 @@ map.addLayer({
 });
 });
 
-map.on('click', 'earthquakes', function (e) {
-new maplibregl.Popup()
-.setLngLat(e.lngLat)
-.setHTML('<h1>Earthquake</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
-.addTo(map);
-});
+map.on('click', 'earthquakes', (e) => createPopup('Earthquake', e));
 
 
 ////airports
@@ -84,7 +86,7 @@ fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson')
 airportData = out )
 .catch(err => { throw err });
 
-    map.on('load', function () {
+map.on('load', function () {
 map.addSource('airports', {
 'type': 'geojson',
 'data': airportData
@@ -104,12 +106,7 @@ map.addLayer({
 });
 });
 
-map.on('click', 'airports', function (e) {
-new maplibregl.Popup()
-.setLngLat(e.lngLat)
-.setHTML('<h1>Airport</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
-.addTo(map);
-});
+map.on('click', 'airports', (e) => createPopup('Airport', e));
 
 
 ///dams
@@ -122,31 +119,113 @@ damData = out )
 .catch(err => { throw err });
 
     map.on('load', function () {
-map.addSource('dams', {
-'type': 'geojson',
-'data': damData
-});
-map.addLayer({
-'id': 'dams',
-'type': 'circle',
-'source': 'dams',
-'paint': {
-  'circle-radius': 4,
-'circle-color': '#0000FF'
-}
-});
-});
-
-map.on('click', 'dams', function (e) {
-new maplibregl.Popup()
-.setLngLat(e.lngLat)
-.setHTML('<h1>Dam</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
-.addTo(map);
+          map.addSource('dams', {
+                'type': 'geojson',
+                'data': damData
+                });
+          map.addLayer(
+            {
+            'id': 'dams',
+            'type': 'circle',
+            'source': 'dams',
+            'paint': {
+              'circle-radius': 4,
+              'circle-color': '#0000FF'
+            }
+          }
+          );
 });
 
+map.on('click', 'dams', (e) => createPopup('Dam', e));
 
 
+//medical
+// use this icon https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caduceus.svg/170px-Caduceus.svg.png
+let medicalData = null;
+fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/medical.geojson')
+.then(res => res.json())
+.then(out =>
+medicalData = out )
+.catch(err => { throw err });
 
+    map.on('load', function () {
+          map.addSource('medical', {
+                'type': 'geojson',
+                'data': medicalData
+                });
+          map.addLayer(
+            {
+            'id': 'medical',
+            'type': 'circle',
+            'source': 'medical',
+            'paint': {
+              'circle-radius': 4,
+              'circle-color': '#0000FF'
+            }
+          }
+          );
+});
+
+map.on('click', 'medical', (e) => createPopup('Medical', e));
+
+//ports
+let portData = null;
+fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/ports.geojson')
+.then(res => res.json())
+.then(out =>
+portData = out )
+.catch(err => { throw err });
+
+    map.on('load', function () {
+          map.addSource('ports', {
+                'type': 'geojson',
+                'data': portData
+                });
+          map.addLayer(
+            {
+            'id': 'ports',
+            'type': 'circle',
+            'source': 'ports',
+            'paint': {
+              'circle-radius': 4,
+              'circle-color': '#0000FF'
+            }
+          }
+          );
+});
+
+map.on('click', 'ports', (e) => createPopup('Port', e));
+
+
+//volcanoes 
+let volcData = null;
+fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/volcanoes.geojson')
+.then(res => res.json())
+.then(out =>
+volcData = out )
+.catch(err => { throw err });
+
+    map.on('load', function () {
+          map.addSource('volcanoes', {
+                'type': 'geojson',
+                'data': volcData
+                });
+          map.addLayer(
+            {
+            'id': 'volcanoes',
+            'type': 'circle',
+            'source': 'volcanoes',
+            'paint': {
+              'circle-radius': 4,
+              'circle-color': '#0000FF'
+            }
+          }
+          );
+});
+
+map.on('click', 'volcanoes', (e) => createPopup('Volcano', e));
+
+//LEGEND
     </script>
 </body>
 </html>
