@@ -50,25 +50,17 @@ function createPopup(name, e) {
                         .addTo(map);
 }
 
-
-let earthquakeData = null;
-fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson')
-.then(res => res.json())
-.then(out =>
- earthquakeData = out )
-.catch(err => { throw err });
-
 map.on('load', function () {
 map.addSource('earthquakes', {
 'type': 'geojson',
-'data': earthquakeData
+'data': 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson'
 });
 map.addLayer({
 'id': 'earthquakes',
 'type': 'circle',
 'source': 'earthquakes',
 'paint': {
-  'circle-radius': 4,
+  'circle-radius': 5,
 'circle-color': '#ffa500',
 "circle-stroke-width": 3,
     "circle-stroke-color": '#B42222'
@@ -81,17 +73,10 @@ map.on('click', 'earthquakes', (e) => createPopup('Earthquake', e));
 
 ////airports
 
-let airportData = null;
-fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson')
-.then(res => res.json())
-.then(out =>
-airportData = out )
-.catch(err => { throw err });
-
 map.on('load', function () {
 map.addSource('airports', {
 'type': 'geojson',
-'data': airportData
+'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson'
 });
 map.addLayer({
 'id': 'airports',
@@ -113,17 +98,10 @@ map.on('click', 'airports', (e) => createPopup('Airport', e));
 
 ///dams
 
-let damData = null;
-fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/dams.geojson')
-.then(res => res.json())
-.then(out =>
-damData = out )
-.catch(err => { throw err });
-
     map.on('load', function () {
           map.addSource('dams', {
                 'type': 'geojson',
-                'data': damData
+                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/dams.geojson'
                 });
           map.addLayer(
             {
@@ -132,7 +110,7 @@ damData = out )
             'source': 'dams',
             'paint': {
               'circle-radius': 4,
-              'circle-color': '#F0FFFF',
+              'circle-color': '#FF0FFF',
               "circle-stroke-width": 1,
     "circle-stroke-color": '#000'
             }
@@ -145,47 +123,36 @@ map.on('click', 'dams', (e) => createPopup('Dam', e));
 
 //medical
 // use this icon https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caduceus.svg/170px-Caduceus.svg.png
-let medicalData = null;
-fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/medical.geojson')
-.then(res => res.json())
-.then(out =>
-medicalData = out )
-.catch(err => { throw err });
 
-    map.on('load', function () {
-          map.addSource('medical', {
-                'type': 'geojson',
-                'data': medicalData
-                });
-          map.addLayer(
-            {
-            'id': 'medical',
-            'type': 'circle',
-            'source': 'medical',
-            'paint': {
-              'circle-radius': 4,
-              'circle-color': '#0000FF',
-              "circle-stroke-width": 1,
-    "circle-stroke-color": '#000'
-            }
-          }
-          );
+
+map.on('load', function () {
+  map.addSource('medical', {
+  'type': 'geojson',
+  'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/medical.geojson'
+  });
+  map.addLayer(
+  {
+  'id': 'medical',
+  'type': 'circle',
+  'source': 'medical',
+  'paint': {
+    'circle-radius': 4,
+    'circle-color': '#000000',
+    "circle-stroke-width": 1,
+    "circle-stroke-color": '#000000'
+  }
+}
+);
 });
 
 map.on('click', 'medical', (e) => createPopup('Medical', e));
 
 //ports
-let portData = null;
-fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/ports.geojson')
-.then(res => res.json())
-.then(out =>
-portData = out )
-.catch(err => { throw err });
 
     map.on('load', function () {
           map.addSource('ports', {
                 'type': 'geojson',
-                'data': portData
+                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/ports.geojson'
                 });
           map.addLayer(
             {
@@ -206,17 +173,11 @@ map.on('click', 'ports', (e) => createPopup('Port', e));
 
 
 //volcanoes 
-let volcData = null;
-fetch('https://github-geojson.s3.eu-central-1.amazonaws.com/volcanoes.geojson')
-.then(res => res.json())
-.then(out =>
-volcData = out )
-.catch(err => { throw err });
 
     map.on('load', function () {
           map.addSource('volcanoes', {
                 'type': 'geojson',
-                'data': volcData
+                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/volcanoes.geojson'
                 });
           map.addLayer(
             {
