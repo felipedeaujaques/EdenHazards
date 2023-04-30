@@ -1,202 +1,478 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset='utf-8' />
-    <title>Eden Hazards - Open Data Map Viewer with maplibre-gl</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.css" rel="stylesheet" />
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-        .mapboxgl-popup {max-width: fit-content !important; }
-        h1 { font-size: smaller !important; }
-        pre { font-size: smaller !important; }
-    </style>
+  <meta charset='utf-8' />
+  <title>Eden Hazards - Open Data Map Viewer with maplibre-gl</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@1.14.0-rc.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .mapboxgl-popup {
+      max-width: fit-content !important;
+    }
+
+    h1 {
+      font-size: smaller !important;
+    }
+
+    pre {
+      font-size: smaller !important;
+    }
+
+    #legend {
+      position: absolute;
+      left: 3%;
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+      line-height: 2Opx;
+      margin-bottom: 50px;
+      width: 210px;
+      height: 180px;
+      background-color: #ffffff;
+      opacity: 0.7;
+      font-size: 15;
+    }
+
+    .legend-key {
+      display: inline-block;
+      border-radius: 20%;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+    }
+
+    #menu {
+      background: #fff;
+      position: absolute;
+      z-index: 1;
+      top: 10px;
+      right: 10px;
+      border-radius: 3px;
+      width: 120px;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+      font-size: 13px;
+      color: #404040;
+      display: block;
+      margin: 0;
+      padding: 0;
+      padding: 10px;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+      text-align: center;
+    }
+
+    #menu a:last-child {
+      border: none;
+    }
+
+    #menu a:hover {
+      background-color: #f8f8f8;
+      color: #404040;
+    }
+
+    #menu a.active {
+      background-color: #3887be;
+      color: #ffffff;
+    }
+
+    #menu a.active:hover {
+      background: #3074a4;
+    }
+  </style>
 </head>
+
 <body>
-<div id='map'></div>
-<script>
-let map = new maplibregl.Map({
-    container: 'map',
-    style: {
-      "version": 8,
-      "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-      "sources": {
-        "osm": {
-          "type": "raster",
-          "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-          "tileSize": 256,
-          "attribution": "&copy; OpenStreetMap Contributors",
-          "maxzoom": 19
-        }
+  <nav id="menu"></nav>
+  <div id='map'></div>
+  <div class='map-overlay' id='legend'>
+    <h1><b>Legend</b></h1>
+  </div>
+
+
+  <script>
+    let map = new maplibregl.Map({
+      version: 1,
+      container: 'map',
+      style: {
+        "version": 8,
+        "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+        "sources": {
+          "osm": {
+            "type": "raster",
+            "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            "tileSize": 256,
+            "attribution": "&copy; OpenStreetMap Contributors",
+            "maxzoom": 19
+          }
+        },
+        "layers": [
+          {
+            "id": "osm",
+            "type": "raster",
+            "source": "osm" // This must match the source key above
+          }
+        ]
       },
-      "layers": [
-        {
-          "id": "osm",
-          "type": "raster",
-          "source": "osm" // This must match the source key above
+      center: [8.5456, 47.3739],
+      zoom: 0
+    });
+
+    function createPopup(name, e) {
+      return new maplibregl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML('<h1>' + name + '</h1><pre id=\'info\'>' + JSON.stringify(e.features[0].properties, null, 2) + '</pre>')
+        .addTo(map);
+    }
+
+    map.on('load', function () {
+      map.addSource('earthquakes', {
+        'type': 'geojson',
+        'data': 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson'
+      });
+      map.addLayer({
+        'id': 'earthquakes',
+        'version': 1,
+        'type': 'circle',
+        'source': 'earthquakes',
+        'layout': {
+            'visibility': 'visible'
+          },
+        'paint': {
+          'circle-radius': 5,
+          'circle-color': '#ffa500',
+          "circle-stroke-width": 3,
+          "circle-stroke-color": '#B42222'
         }
-      ]
-    },
-    center: [8.5456, 47.3739],
-    zoom: 0
-});
+      });
+    });
 
-function createPopup(name, e) {
-  return new maplibregl.Popup()
-                        .setLngLat(e.lngLat)
-                        .setHTML('<h1>'+name+'</h1><pre id=\'info\'>'+JSON.stringify(e.features[0].properties, null,2)+'</pre>')
-                        .addTo(map);
-}
-
-map.on('load', function () {
-map.addSource('earthquakes', {
-'type': 'geojson',
-'data': 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson'
-});
-map.addLayer({
-'id': 'earthquakes',
-'type': 'circle',
-'source': 'earthquakes',
-'paint': {
-  'circle-radius': 5,
-'circle-color': '#ffa500',
-"circle-stroke-width": 3,
-    "circle-stroke-color": '#B42222'
-}
-});
-});
-
-map.on('click', 'earthquakes', (e) => createPopup('Earthquake', e));
+    map.on('click', 'earthquakes', (e) => createPopup('Earthquake', e));
 
 
-////airports
-
-map.on('load', function () {
-map.addSource('airports', {
-'type': 'geojson',
-'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson'
-});
-map.addLayer({
-'id': 'airports',
-'type': 'symbol',
-'source': 'airports',
-'layout': {
-'text-field':  ['get', 'name'],
-'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-'text-radial-offset': 0.5,
-'text-justify': 'auto',
-'text-font': ['Open Sans Bold'],
-'text-size': 10
-}
-});
-});
-
-map.on('click', 'airports', (e) => createPopup('Airport', e));
-
-
-///dams
+    ////airports
 
     map.on('load', function () {
-          map.addSource('dams', {
-                'type': 'geojson',
-                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/dams.geojson'
-                });
-          map.addLayer(
-            {
-            'id': 'dams',
-            'type': 'circle',
-            'source': 'dams',
-            'paint': {
-              'circle-radius': 4,
-              'circle-color': '#FF0FFF',
-              "circle-stroke-width": 1,
-    "circle-stroke-color": '#000'
-            }
-          }
-          );
-});
+      map.addSource('airports', {
+        'type': 'geojson',
+        'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/airports.geojson'
+      });
+      map.addLayer({
+        'id': 'airports',
+        'version': 1,
+        'type': 'symbol',
+        'source': 'airports',
+        'layout': {
+          'text-field': ['get', 'name'],
+          'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+          'text-radial-offset': 0.5,
+          'text-justify': 'auto',
+          'text-font': ['Open Sans Bold'],
+          'text-size': 10,
+          'visibility': 'visible'
+        }
+      });
+    });
 
-map.on('click', 'dams', (e) => createPopup('Dam', e));
-
-
-//medical
-// use this icon https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caduceus.svg/170px-Caduceus.svg.png
+    map.on('click', 'airports', (e) => createPopup('Airport', e));
 
 
-map.on('load', function () {
-  map.addSource('medical', {
-  'type': 'geojson',
-  'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/medical.geojson'
-  });
-  map.addLayer(
-  {
-  'id': 'medical',
-  'type': 'circle',
-  'source': 'medical',
-  'paint': {
-    'circle-radius': 4,
-    'circle-color': '#000000',
-    "circle-stroke-width": 1,
-    "circle-stroke-color": '#000000'
-  }
-}
-);
-});
-
-map.on('click', 'medical', (e) => createPopup('Medical', e));
-
-//ports
+    ///dams
 
     map.on('load', function () {
-          map.addSource('ports', {
-                'type': 'geojson',
-                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/ports.geojson'
-                });
-          map.addLayer(
-            {
-            'id': 'ports',
-            'type': 'circle',
-            'source': 'ports',
-            'paint': {
-              'circle-radius': 4,
-              'circle-color': '#4169E1',
-              "circle-stroke-width": 1,
-    "circle-stroke-color": '#000'
-            }
+      map.addSource('dams', {
+        'type': 'geojson',
+        'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/dams.geojson'
+      });
+      map.addLayer(
+        {
+          'id': 'dams',
+          'type': 'circle',
+          'version': 1,
+          'source': 'dams',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'circle-radius': 4,
+            'circle-color': '#FF0FFF',
+            "circle-stroke-width": 1,
+            "circle-stroke-color": '#000'
           }
-          );
-});
+        }
+      );
+    });
 
-map.on('click', 'ports', (e) => createPopup('Port', e));
+    map.on('click', 'dams', (e) => createPopup('Dam', e));
 
 
-//volcanoes 
+    //medical
+    // use this icon https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caduceus.svg/170px-Caduceus.svg.png
+
 
     map.on('load', function () {
-          map.addSource('volcanoes', {
-                'type': 'geojson',
-                'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/volcanoes.geojson'
-                });
-          map.addLayer(
-            {
-            'id': 'volcanoes',
-            'type': 'circle',
-            'source': 'volcanoes',
-            'paint': {
-              'circle-radius': 4,
-              'circle-color': '#800000',
-              "circle-stroke-width": 1,
-    "circle-stroke-color": '#000'
-            }
+      map.addSource('medical', {
+        'type': 'geojson',
+        'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/medical.geojson',
+        cluster: true,
+        clusterMaxZoom: 16, // Max zoom to cluster points on
+        clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+      });
+      map.addLayer(
+        {
+          'id': 'medical',
+          'version': 1,
+          'type': 'circle',
+          'source': 'medical',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'circle-radius': 4,
+            'circle-color': '#000000',
+            "circle-stroke-width": 1,
+            "circle-stroke-color": '#000000'
           }
-          );
-});
+        }
+      );
 
-map.on('click', 'volcanoes', (e) => createPopup('Volcano', e));
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'medical',
+        filter: ['has', 'point_count'],
+        paint: {
+          // Use step expressions (https://maplibre.org/maplibre-style-spec/#expressions-step)
+          // with three steps to implement three types of circles:
+          //   * Blue, 20px circles when point count is less than 50
+          //   * Yellow, 25px circles when point count is between 50 and 1000
+          //   * Pink, 30px circles when point count is greater than or equal to 1000
+          'circle-color': '#000000',
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            50,
+            25,
+            1000,
+            30
+          ]
+        }
+      });
 
-//LEGEND
-    </script>
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'medical',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['Open Sans Bold'],
+          'text-size': 12
+        },
+        paint: {
+          "text-color": "#ffffff"
+        }
+      });
+
+      // inspect a cluster on click
+      map.on('click', 'clusters', function (e) {
+        let features = map.queryRenderedFeatures(e.point, {
+          layers: ['clusters']
+        });
+        let clusterId = features[0].properties.cluster_id;
+        map.getSource('medical').getClusterExpansionZoom(
+          clusterId,
+          function (err, zoom) {
+            if (err) return;
+
+            map.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom
+            });
+          }
+        );
+      });
+
+      map.on('click', 'medical', function (e) {
+        let coordinates = e.features[0].geometry.coordinates.slice();
+        new maplibregl.Popup()
+          .setLngLat(coordinates)
+          .setHTML('Medical <pre>' + JSON.stringify(e.features[0].properties) + '</pre>')
+          .addTo(map);
+      });
+
+      map.on('mouseenter', 'clusters', function () {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'clusters', function () {
+        map.getCanvas().style.cursor = '';
+      });
+
+    });
+
+    //ports
+
+    map.on('load', function () {
+      map.addSource('ports', {
+        'type': 'geojson',
+        'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/ports.geojson'
+      });
+      map.addLayer(
+        {
+          'id': 'ports',
+          'version': 1,
+          'type': 'circle',
+          'source': 'ports',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'circle-radius': 4,
+            'circle-color': '#4169E1',
+            "circle-stroke-width": 1,
+            "circle-stroke-color": '#000'
+          }
+        }
+      );
+    });
+
+    map.on('click', 'ports', (e) => createPopup('Port', e));
+
+
+    //volcanoes 
+
+    map.on('load', function () {
+      map.addSource('volcanoes', {
+        'type': 'geojson',
+        'data': 'https://github-geojson.s3.eu-central-1.amazonaws.com/volcanoes.geojson'
+      });
+      map.addLayer(
+        {
+          'id': 'volcanoes',
+          'version': 1,
+          'type': 'circle',
+          'source': 'volcanoes',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'circle-radius': 4,
+            'circle-color': '#800000',
+            "circle-stroke-width": 1,
+            "circle-stroke-color": '#000'
+          }
+        }
+      );
+    });
+
+    map.on('click', 'volcanoes', (e) => createPopup('Volcano', e));
+
+    map.on('load', function () {
+
+      //LEGEND
+
+      map.getCanvas().style.cursor = 'default';
+      map.getCanvas().style.cursor = 'default';
+      let layersAndColors = {
+      'earthquakes': {
+        'color': '#ffa500',
+        'stroke': '#B42222'
+      },
+       'ports': {
+        'color': '#4169E1',
+        'stroke': '#000'
+       },
+       'dams': {
+        'color': '#ff0fff',
+        'stroke': '#000'
+       },
+       'medical': {
+        'color': '#000000',
+        'text': '#FFF'
+       }, 
+       'volcanoes': {
+        'color': '#800000',
+        'stroke': '#000'
+       },
+       'airports' : {
+        'text': '#FFF'
+       }
+    }
+      // let layers = Object.keys(map.style.sourceCaches);
+      for (const [layerName, paintObject] of Object.entries(layersAndColors)) {
+          console.log(`${layerName}: ${paintObject}`);
+          let item = document.createElement('div');
+          let key = document.createElement('span');
+          key.className = 'legend-key';
+          key.style.backgroundColor = paintObject.color;
+          if (paintObject.stroke) {key.style.border = "2px solid "+paintObject.stroke}
+          console.log(`${paintObject.stroke}`);
+          let value = document.createElement('span');
+          value.innerHTML = layerName;
+          item.appendChild(key);
+          item.appendChild(value);
+          legend.appendChild(item);
+      }
+    }
+
+    )
+
+
+
+    map.addControl(new maplibregl.NavigationControl());
+
+
+    let toggleableLayerIds = ['earthquakes','ports','dams','medical','volcanoes','airports'];
+    for (let i = 0; i < toggleableLayerIds.length; i++) {
+      let id = toggleableLayerIds[i]
+      let link = document.createElement('a')
+      link.href = '#'
+      link.className = 'active'
+      link.textContent = id
+      link.onclick = function (e) {
+        let clickedLayer = this.textContent
+        e.preventDefault()
+        e.stopPropagation()
+        let visibility = map.getLayoutProperty(clickedLayer, 'visibility')
+        console.log('Visibility:'+visibility);
+        console.log('clickedLayer:'+clickedLayer);
+        if (visibility === 'visible') {
+          map.setLayoutProperty(clickedLayer, 'visibility', 'none')
+          if (clickedLayer == 'medical') {
+            map.setLayoutProperty('clusters', 'visibility', 'none')
+            map.setLayoutProperty('cluster-count', 'visibility', 'none')
+          }
+          this.className = ''
+        } else {
+          this.className = 'active'
+          map.setLayoutProperty(clickedLayer, 'visibility', 'visible')
+          if (clickedLayer == 'medical') {
+            map.setLayoutProperty('clusters', 'visibility', 'visible')
+            map.setLayoutProperty('cluster-count', 'visibility', 'visible')
+          }
+        }
+      }
+      let layers = document.getElementById('menu')
+      layers.appendChild(link)
+    }
+  </script>
 </body>
+
 </html>
